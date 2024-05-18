@@ -2,8 +2,9 @@ import {Component} from 'react'
 import './index.css'
 
 import Loader from 'react-loader-spinner'
-
 import ReactPaginate from 'react-paginate'
+import {FcLike} from 'react-icons/fc'
+import {IoLocationSharp} from 'react-icons/io5'
 
 class Header extends Component {
   state = {
@@ -12,6 +13,7 @@ class Header extends Component {
     query: '',
     pageCount: 0,
     status: 'INITIAL',
+    hoveredImage: null,
   }
 
   componentDidMount() {
@@ -56,7 +58,7 @@ class Header extends Component {
       const paginatedData = completeData.slice(start, end)
 
       this.setState({data: paginatedData, status: 'SUCCESS'})
-    }, 500) // Simulating a delay for demonstration purposes. Adjust as needed.
+    }, 500)
   }
 
   onEnterQuery = event => {
@@ -65,6 +67,14 @@ class Header extends Component {
 
   onSelectOption = value => {
     this.setState({query: value})
+  }
+
+  handleMouseEnter = image => {
+    this.setState({hoveredImage: image})
+  }
+
+  handleMouseLeave = () => {
+    this.setState({hoveredImage: null})
   }
 
   renderDisplay = () => {
@@ -89,7 +99,7 @@ class Header extends Component {
   )
 
   renderSuccess = () => {
-    const {query, pageCount, data} = this.state
+    const {pageCount, data, hoveredImage} = this.state
     return (
       <div>
         <ul className="ss">
@@ -103,7 +113,6 @@ class Header extends Component {
           </li>
           <li
             className="sample-items"
-            value="Mountains"
             onClick={() => {
               this.onSelectOption('Mountains')
             }}
@@ -112,7 +121,6 @@ class Header extends Component {
           </li>
           <li
             className="sample-items"
-            value="Flowers"
             onClick={() => {
               this.onSelectOption('Flowers')
             }}
@@ -121,7 +129,6 @@ class Header extends Component {
           </li>
           <li
             className="sample-items"
-            value="Beaches"
             onClick={() => {
               this.onSelectOption('Beaches')
             }}
@@ -131,14 +138,45 @@ class Header extends Component {
         </ul>
         <ul className="images-container">
           {data.map(each => {
-            console.log(each.urls.regular, each.description)
+            console.log(each)
             return (
-              <li>
+              <li
+                key={each.id}
+                className="images-card"
+                onMouseEnter={() => this.handleMouseEnter(each)}
+                onMouseLeave={this.handleMouseLeave}
+              >
                 <img
                   src={each.urls.full}
                   alt={each.description}
                   className="images"
                 />
+                {hoveredImage === each && (
+                  <div className="hover-details">
+                    <a href={each.urls.full} target="_blank" rel="noreferrer">
+                      Open in new tab
+                    </a>
+                    <p className="details">
+                      Photographer : {each.user.first_name}
+                    </p>
+                    <p>
+                      <span>
+                        <FcLike className="likes" />
+                      </span>
+                      : <span className="like">{each.likes}</span>
+                    </p>
+                    <p>
+                      <span>
+                        <IoLocationSharp className="likes" />
+                      </span>
+                      : <span className="like">{each.user.location}</span>
+                    </p>
+                    <p className="details">
+                      Description :{' '}
+                      <span className="details"> {each.alt_description}</span>
+                    </p>
+                  </div>
+                )}
               </li>
             )
           })}
@@ -170,7 +208,7 @@ class Header extends Component {
   renderError = () => <div>Error occurred.</div>
 
   render() {
-    const {status, query} = this.state
+    const {query} = this.state
 
     return (
       <>
